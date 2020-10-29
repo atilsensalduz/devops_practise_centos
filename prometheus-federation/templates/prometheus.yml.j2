@@ -1,0 +1,36 @@
+# Global config
+global:
+  scrape_interval:     15s 
+  evaluation_interval: 15s 
+  scrape_timeout: 15s 
+scrape_configs:
+  - job_name: 'federate'
+    scrape_interval: 15s
+
+    honor_labels: true
+    metrics_path: '/federate'
+
+    params:
+      'match[]':
+        - '{job="kubernetes-nodes"}'
+        - '{job="kubernetes-pods"}'
+        - '{job="kubernetes-apiservers"}'
+        - '{job="kubernetes-service-endpoints"}'
+        - '{job="kubernetes-cadvisor"}'
+        - '{job="kubernetes-nodes-cadvisor"}'
+        - '{job="kube-state-metrics"}'
+
+
+    static_configs:
+      - targets:
+        - "{{prometheusserverurl}}:80"
+
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+      - localhost:9093
+
+rule_files:
+ - /etc/prometheus/rules.yml
+

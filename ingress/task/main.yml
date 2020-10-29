@@ -1,0 +1,28 @@
+---
+  - name: "Install NGINX Ingress Controller with Ansible"
+    hosts: localhost
+    connection: local
+    tasks:
+
+    - name: "Clone nginx github repository"
+      git:
+        repo: https://github.com/nginxinc/kubernetes-ingress.git
+        dest: /workspace/roles/ingress/configs/
+
+    - name: "Create a namespace and a service account for the Ingress controller"
+      command: "kubectl apply -f /workspace/roles/ingress/configs/deployments/common/ns-and-sa.yaml"
+
+    - name: "Create a cluster role and cluster role binding for the service account"
+      command: "kubectl apply -f /workspace/roles/ingress/configs/deployments/rbac/rbac.yaml"
+
+    - name: "Create a secret with a TLS certificate and a key for the default server in NGINX"
+      command: "kubectl apply -f /workspace/roles/ingress/configs/deployments/common/default-server-secret.yaml"
+
+    - name: "Create a config map for customizing NGINX configuration"
+      command: "kubectl apply -f /workspace/roles/ingress/configs/deployments/common/nginx-config.yaml"
+
+    - name: "Create an IngressClass resource"
+      command: "kubectl apply -f /workspace/roles/ingress/configs/deployments/common/ingress-class.yaml"
+
+    - name: "Create an DaemonSet for Ingress controller"
+      command: "kubectl apply -f /workspace/roles/ingress/configs/deployments/daemon-set/nginx-ingress.yaml"

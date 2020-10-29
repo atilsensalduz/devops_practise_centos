@@ -1,0 +1,92 @@
+---
+  - name: "Install Prometheus Federation with Ansible"
+    hosts: all
+
+    tasks:
+    - name: "update prometheus federation server hostnames"
+      hostname:
+        name: "{{ federation_hostname }}"
+
+    - name: check connection
+      ping:
+    
+    - name: setup
+      setup:
+  
+    - name: "Build hosts file"
+      lineinfile: 
+        dest: /etc/hosts
+        state: present
+        dest: /etc/hosts
+        regexp: '.*{{ item }}$' 
+        line: "{{ hostvars[item].ansible_default_ipv4.address }} {{hostvars[item].ansible_hostname}}"
+      when: hostvars[item].ansible_default_ipv4.address is defined
+      with_items: "{{ groups['all'] }}"
+
+
+    - name: "Install requiered packages"
+      yum:
+        name:
+          - wget 
+        state: present
+
+
+    - name: "Create prometheus  user"
+      user:
+        name: prometheus
+        shell: /bin/false
+
+    - name: "create prometheus directory"
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: prometheus
+        group: prometheus
+      with_items:
+        - /etc/prometheus
+        - /var/lib/prometheus
+
+    - name: "download prometheus binary"
+      get_url: 
+        url: https://github.com/prometheus/prometheus/releases/download/v{{prometheusversion}}/prometheus-{{prometheusversion}}.linux-amd64.tar.gz
+        dest: /tmp/
+
+    - name: "unzip prometheus binary"
+      unarchive:
+        src: /tmp/prometheus-{{prometheusversion}}.linux-amd64.tar.gz
+        dest: /tmp/
+        copy: no
+
+    - name: "move binary to /usr/local/bin"
+      copy:
+        src: "{{ item }}"
+        dest: /usr/local/bin
+        mode: u=rwx,g=rx,o=rx
+      with_items:
+        - /tmp/prometheus-{{prometheusversion}}.linux-amd64/prometheus
+        - /tmp/prometheus-{{prometheusversion}}.linux-amd64/promtool
+
+
+    - name: "generate prometheus.yml template"
+      template:
+        src: /workspace/roles/prometheus-federation/templates/prometheus.yml.j2
+        dest: /etc/prometheus/prometheus.yml
+
+    - name: "generate alertmanager rules.yml template"
+      copy:
+        src: /workspace/roles/prometheus-federation/templates/rules.yml
+        dest: /etc/prometheus/rules.yml
+
+
+    - name: "generate prometheus.service template"
+      template:
+        src: /workspace/roles/prometheus-federation/templates/prometheus.service.j2
+        dest: /etc/systemd/system/prometheus.service
+
+    - name: "prometheus service start and enable"
+      systemd:
+        name: prometheus
+        state: started
+        enabled: True
+
+        

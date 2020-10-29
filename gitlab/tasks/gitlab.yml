@@ -1,0 +1,58 @@
+---
+  - name: "Install Gitlab with Ansible"
+    hosts: gitlab_server
+
+    tasks:
+    - name: "update gitlab server hostnames"
+      hostname:
+        name: "{{ gitlab_hostname }}"
+
+    - name: check connection
+      ping:
+    
+    - name: setup
+      setup:
+  
+    - name: "Build hosts file"
+      lineinfile: 
+        dest: /etc/hosts
+        state: present
+        regexp: '.*{{ item }}$' 
+        line: "{{ hostvars[item].ansible_default_ipv4.address }} {{hostvars[item].ansible_hostname}}"
+      when: hostvars[item].ansible_default_ipv4.address is defined
+      with_items: "{{ groups['all'] }}"
+
+
+    - name: "Install requiered packages"
+      yum:
+        name:
+          - wget 
+          - unzip
+          - policycoreutils 
+          - postfix  
+        state: present
+
+    - name: "download gitlab repo script"
+      get_url: 
+        url: https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.rpm.sh
+        dest: /tmp/
+        mode: "u=rwx,g=rx,o=rx"
+
+    - name: "run gitlab repo script"
+      shell: /bin/bash /tmp/script.rpm.sh
+  
+    - name: "Install Gitlab Packages"
+      yum:
+        name: gitlab-ce
+        state: present
+ 
+    - name: "generate /etc/gitlab/gitlab.rb template"
+      template:
+        src: /workspace/roles/gitlab/templates/gitlab.rb.j2
+        dest: /etc/gitlab/gitlab.rb
+
+
+    - name: "reconfigure gitlab"
+      shell: gitlab-ctl reconfigure
+
+        

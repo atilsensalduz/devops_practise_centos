@@ -1,0 +1,11 @@
+---
+  - name: "Set affinity for prometheus-server"
+    hosts: localhost
+    connection: local
+    tasks:
+
+    - name: "Label to Node2 for Prometheus-Server"
+      command: "kubectl label nodes node2 server=prometheus-server"
+
+    - name: "Taint for only schedule Prometheus-Server on Node2"
+      command: "kubectl taint nodes node2 prometheus-taint=prometheus-server:NoSchedule"

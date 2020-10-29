@@ -1,0 +1,9 @@
+groups:
+- name: AllInstances
+  rules:
+  - alert: PodRestart
+    expr:  rate(kube_pod_container_status_restarts_total[1m]) > 0
+    annotations:
+     description: '{{ $labels.pod }} has been restarted in namespace {{ $labels.namespace }}'
+    labels:
+       severity: 'critical'

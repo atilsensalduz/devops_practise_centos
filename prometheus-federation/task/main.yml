@@ -1,0 +1,26 @@
+---
+  - name: "Install Kubernetes Cluster with Kubespray"
+    hosts: localhost
+    connection: local
+    vars_prompt:
+
+    - name: federationip
+      prompt: "What is your prometheus federation server? "
+      private: no
+
+    - name: prometheusversion
+      prompt: "Which version prometheus-federation has installing"
+      private: no
+
+    - name: prometheusserverurl
+      prompt: "What is your prometheus-server ingress url"
+      private: no
+
+
+    tasks:
+            
+            # - name: "Update Ansible inventory file with inventory builder"
+            #shell: declare -a IPS=({{clusterips}});python3 /workspace/roles/prometheus-federation/helper/inventory_builder.py ${IPS[@]}
+
+    - name: "Deploy Federation with Ansible Playbook"
+      command: ansible-playbook -i /workspace/roles/prometheus-federation/task/host.ini  --become --become-user=root /workspace/roles/prometheus-federation/task/federation.yml --extra-var "prometheusversion={{prometheusversion}} prometheusserverurl={{prometheusserverurl}}"

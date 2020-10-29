@@ -1,0 +1,29 @@
+---
+  - name: "Install Kubernetes Cluster with Kubespray"
+    hosts: localhost
+    connection: local
+    vars_prompt:
+
+    - name: clusterips
+      prompt: "What is your consul cluster ips? (you must write 1 or 3 or 5 nodes and write like: ip1 ip2 ip3)"
+      private: no
+
+    - name: consulversion
+      prompt: "Which version consul has installing"
+      private: no
+
+    - name: consul_datacenter_name
+      promt: "What is your consul data center name?"
+      private: no
+
+    - name: consul_domain_name
+      promt: "What is your consul domain name?"
+      private: no
+
+    tasks:
+            
+            # - name: "Update Ansible inventory file with inventory builder"
+            #shell: declare -a IPS=({{clusterips}});python3 /workspace/roles/consul/helper/inventory_builder.py ${IPS[@]}
+
+    - name: "Deploy Consul with Ansible Playbook"
+      command: ansible-playbook -i /workspace/roles/consul/task/host.ini  --become --become-user=root /workspace/roles/consul/task/consul.yml --extra-var "consulversion={{consulversion}} consul_datacenter_name={{consul_datacenter_name}} consul_domain_name={{consul_domain_name}}"

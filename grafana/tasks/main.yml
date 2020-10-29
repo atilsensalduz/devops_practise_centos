@@ -1,0 +1,20 @@
+---
+  - name: "Install Prometheus Server with Ansible"
+    hosts: localhost
+    connection: local
+    tasks:
+
+    - name: "Create the Monitoring Namespace"
+      command: "kubectl apply -f /workspace/roles/monitoring/templates/prometheus-ns.yml"
+
+    - name: "Create a clusterrole binding and rbac"
+      command: "kubectl apply -f /workspace/roles/monitoring/templates/clusterrole.yml"
+
+    - name: "Create a ConfigMap for prometheus"
+      command: "kubectl apply -f /workspace/roles/monitoring/templates/prometheus-configmap.yml"
+
+    - name: "Create a deployment for prometheus"
+      command: "kubectl apply -f /workspace/roles/monitoring/templates/prometheus-deployment.yml"
+  
+    - name: "Create a ingres resouce for prometheus"
+      command: "kubectl apply -f /workspace/roles/monitoring/templates/prometheus-ingress.yaml"

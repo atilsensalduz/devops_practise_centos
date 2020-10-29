@@ -1,0 +1,17 @@
+---
+  - name: "Install Gitlab with Ansible"
+    hosts: localhost
+    connection: local
+    vars_prompt:
+
+    - name: gitlab_external_url
+      prompt: "What is your gitlab external url?"
+      private: no
+
+    tasks:
+            
+            # - name: "Update Ansible inventory file with inventory builder"
+            #shell: declare -a IPS=({{clusterips}});python3 /workspace/roles/consul/helper/inventory_builder.py ${IPS[@]}
+
+    - name: "Run Gitlab Ansible Playbook"
+      command: ansible-playbook -i /workspace/roles/gitlab/tasks/host.ini  --become --become-user=root /workspace/roles/gitlab/tasks/gitlab.yml --extra-var "gitlab_external_url={{gitlab_external_url}}"

@@ -1,0 +1,76 @@
+---
+  - name: "Install ElasticSearch with Ansible"
+    hosts: all
+
+    tasks:
+    - name: "update elastic server hostnames"
+      hostname:
+        name: "{{ elastic_hostname }}"
+
+    - name: check connection
+      ping:
+    
+    - name: setup
+      setup:
+  
+    - name: "Build hosts file"
+      lineinfile: 
+        dest: /etc/hosts
+        state: present
+        dest: /etc/hosts
+        regexp: '.*{{ item }}$' 
+        line: "{{ hostvars[item].ansible_default_ipv4.address }} {{hostvars[item].ansible_hostname}}"
+      when: hostvars[item].ansible_default_ipv4.address is defined
+      with_items: "{{ groups['all'] }}"
+
+
+    - name: "Install requiered packages"
+      yum:
+        name:
+          - wget 
+          - unzip
+          - java
+        state: present
+
+    - name: "copy elastic repo file"
+      copy: 
+        src: /workspace/roles/logging/templates/elasticstack.repo 
+        dest: /etc/yum.repos.d/
+
+    - name: "install elasticsearch"
+      yum:
+        name: elasticsearch
+        state: present
+
+    - name: "generate elastic.yml template"
+      template:
+        src: /workspace/roles/logging/templates/elasticsearch.yml.j2
+        dest: /etc/elasticsearch/elasticsearch.yml
+        group: elasticsearch
+
+
+    - name: "elasticsearch service start and enable"
+      systemd:
+        name: elasticsearch
+        state: started
+        enabled: True
+
+
+    - name: "install kibnaa"
+      yum:
+        name: kibana
+        state: present
+
+
+    - name: "generate elastic.yml template"
+      template:
+        src: /workspace/roles/logging/templates/kibana.yml.j2
+        dest: /etc/kibana/kibana.yml
+        group: kibana
+
+    - name: "kibana service start and enable"
+      systemd:
+        name: kibana
+        state: started
+        enabled: True
+  

@@ -1,0 +1,21 @@
+---
+  - name: "Install Alert Manager with Ansible"
+    hosts: localhost
+    connection: local
+    vars_prompt:
+
+    - name: alertmanagerip
+      prompt: "What is your alert manager server ip? "
+      private: no
+
+    - name: alertmanagerversion
+      prompt: "Which version alert manager has installing"
+      private: no
+
+    tasks:
+            
+            # - name: "Update Ansible inventory file with inventory builder"
+            #shell: declare -a IPS=({{clusterips}});python3 /workspace/roles/prometheus-federation/helper/inventory_builder.py ${IPS[@]}
+
+    - name: "Run Alert ManagerPlaybook"
+      command: ansible-playbook -i /workspace/roles/alertmanager/tasks/host.ini  --become --become-user=root /workspace/roles/alertmanager/tasks/alertmanager.yml --extra-var "alertmanagerversion={{alertmanagerversion}}"

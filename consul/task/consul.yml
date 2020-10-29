@@ -1,0 +1,99 @@
+---
+  - name: "Install Consul Cluster with Ansible"
+    hosts: all
+
+    tasks:
+    - name: "update consul server hostnames"
+      hostname:
+        name: "{{ consul_hostname }}"
+
+    - name: check connection
+      ping:
+    
+    - name: setup
+      setup:
+  
+    - name: "Build hosts file"
+      lineinfile: 
+        dest: /etc/hosts
+        state: present
+        dest: /etc/hosts
+        regexp: '.*{{ item }}$' 
+        line: "{{ hostvars[item].ansible_default_ipv4.address }} {{hostvars[item].ansible_hostname}}"
+      when: hostvars[item].ansible_default_ipv4.address is defined
+      with_items: "{{ groups['all'] }}"
+
+
+    - name: "Install requiered packages"
+      yum:
+        name:
+          - wget 
+          - unzip
+        state: present
+
+    - name: "download consul binary"
+      get_url: 
+        url: https://releases.hashicorp.com/consul/{{consulversion}}/consul_{{consulversion}}_linux_amd64.zip
+        dest: /tmp/
+
+    - name: "unzip consul binary"
+      unarchive:
+        src: /tmp/consul_{{consulversion}}_linux_amd64.zip
+        dest: /usr/local/bin/
+        copy: no
+
+    - name: "Create consul system group"
+      group:
+        name: consul
+        system : yes
+        state: present
+    
+    - name: "Create consul system user"
+      user:
+        name: consul
+        shell: /sbin/nologin
+        system: yes
+        groups: consul
+        
+    - name: "create /var/lib/consul directory"
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+        owner: consul
+        group: consul
+      with_items:
+        - /var/lib/consul
+        - /etc/consul.d  
+
+    - name: "get consul keygen"
+      shell: "/usr/local/bin/consul keygen"
+      register: consul_keygen_output
+      run_once: true
+
+    - name: "set consul keygen variable"
+      set_fact:
+        consul_keygen: "{{ consul_keygen_output.stdout }}"
+  
+    - name: "print ip addresses"
+      debug:
+        var: ansible_default_ipv4.address
+
+    - name: "generate consul.service template"
+      template:
+        src: /workspace/roles/consul/templates/consul.service.j2
+        dest: /etc/systemd/system/consul.service
+
+
+    - name: "generate config.json template"
+      template:
+        src: /workspace/roles/consul/templates/config.json.j2
+        dest: /etc/consul.d/config.json
+
+    - name: "consul service start and enable"
+      systemd:
+        name: consul
+        state: started
+        enabled: True
+
+        

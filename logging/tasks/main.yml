@@ -1,0 +1,25 @@
+---
+  - name: "Install Logging K8S with Ansible"
+    hosts: localhost
+    connection: local
+    vars_prompt:
+    - name: elastic_cluster_name
+      prompt: "What is your elasticsearch cluster name? "
+      private: no
+
+
+
+    - name: elastic_host_ip
+      prompt: "What is your elasticsearch host ip? "
+      private: no
+
+    tasks:
+            
+            # - name: "Update Ansible inventory file with inventory builder"
+            #shell: declare -a IPS=({{clusterips}});python3 /workspace/roles/prometheus-federation/helper/inventory_builder.py ${IPS[@]}
+
+    - name: "Run Elastic Playbook"
+      command: ansible-playbook -i /workspace/roles/logging/tasks/host.ini  --become --become-user=root /workspace/roles/logging/tasks/elastic.yml --extra-var "elastic_cluster_name={{elastic_cluster_name}} elastic_host_ip={{elastic_host_ip}}"
+
+    - name: "Run Fluent Playbook"
+      command: ansible-playbook -i /workspace/roles/logging/tasks/host.ini  --become --become-user=root /workspace/roles/logging/tasks/fluentbit.yml --extra-var "elastic_host_ip={{elastic_host_ip}}"

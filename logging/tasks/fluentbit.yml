@@ -1,0 +1,29 @@
+---
+  - name: "Install Fluent Bit on K8S with Ansible"
+    hosts: localhost
+    connection: local
+
+    tasks:
+
+    - name: "Create the Logging Namespace"
+      command: "kubectl apply -f /workspace/roles/logging/templates/fluent-bit-ns.yml"
+
+    - name: "Create service account for flunet-bit"
+      command: "kubectl apply -f /workspace/roles/logging/templates/fluent-bit-service-account.yaml"
+
+    - name: "Create a clusterrole for fluent-bit"
+      command: "kubectl apply -f /workspace/roles/logging/templates/fluent-bit-role.yaml"
+
+    - name: "Create a clusterrolebinding for fluent-bit"
+      command: "kubectl apply -f /workspace/roles/logging/templates/fluent-bit-role-binding.yaml"
+
+    - name: "Create a ConfigMap for fluent-bit"
+      command: "kubectl apply -f /workspace/roles/logging/templates/fluent-bit-configmap.yaml"
+
+    - name: "generate daemon set with elastic host ip"
+      template:
+        src: /workspace/roles/logging/templates/fluent-bit-ds.yaml.j2
+        dest: /workspace/roles/logging/templates/fluent-bit-ds.yaml
+
+    - name: "Create a daemon set for fluent-bit"
+      command: "kubectl apply -f /workspace/roles/logging/templates/fluent-bit-ds.yaml"

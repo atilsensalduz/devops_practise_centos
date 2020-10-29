@@ -1,0 +1,72 @@
+---
+  - name: "Install alertmanager with Ansible"
+    hosts: all
+
+    tasks:
+    - name: "Install requiered packages"
+      yum:
+        name:
+          - wget 
+        state: present
+
+
+    - name: "Create alertmanager user"
+      user:
+        name: alertmanager
+        shell: /sbin/nologin
+        createhome: "no"
+        state: present
+        system: yes
+
+    - name: "create prometheus directory"
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: alertmanager
+        group: alertmanager
+      with_items:
+        - /etc/alertmanager
+        - /etc/alertmanager/template
+        - /var/lib/alertmanager/
+        - /var/lib/alertmanager/data
+
+    - name: "download alertmanager binary"
+      get_url: 
+        url: https://github.com/prometheus/alertmanager/releases/download/v{{alertmanagerversion}}/alertmanager-{{alertmanagerversion}}.linux-amd64.tar.gz
+        dest: /tmp/
+
+    - name: "unzip alertmanager binary"
+      unarchive:
+        src: /tmp/alertmanager-{{alertmanagerversion}}.linux-amd64.tar.gz
+        dest: /tmp/
+        copy: no
+
+    - name: "move binary to /usr/local/bin"
+      copy:
+        src: "{{ item }}"
+        dest: /usr/local/bin
+        mode: u=rwx,g=rx,o=rx
+        owner: alertmanager
+        group: alertmanager
+        remote_src: yes
+      with_items:
+        - /tmp/alertmanager-{{alertmanagerversion}}.linux-amd64/alertmanager
+        - /tmp/alertmanager-{{alertmanagerversion}}.linux-amd64/amtool
+
+
+    - name: "generate alertmanager.yml template"
+      copy:
+        src: /workspace/roles/alertmanager/templates/alertmanager.yml
+        dest: /etc/alertmanager/alertmanager.yml
+
+
+    - name: "generate alertmanager.service template"
+      template:
+        src: /workspace/roles/alertmanager/templates/alertmanager.service.j2
+        dest: /etc/systemd/system/alertmanager.service
+
+    - name: "alertmanager service start and enable"
+      systemd:
+        name: alertmanager
+        state: started
+        enabled: True 
