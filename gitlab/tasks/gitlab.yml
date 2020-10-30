@@ -55,4 +55,20 @@
     - name: "reconfigure gitlab"
       shell: gitlab-ctl reconfigure
 
-        
+    - name: "download gitlab runner binary"
+      get_url:
+        url: https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-linux-amd64
+        dest: /usr/local/bin/gitlab-runner
+        mode: "u=rwx,g=rx,o=rx"
+
+    - name: "Create gitlab-runner user"
+      user:
+        name: gitlab-runner
+        shell: /bin/bash
+        create_home: yes
+
+    - name: "run gitlab-runner installation"
+      command: "/usr/local/bin/gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab-runner"
+
+    - name: "run gitlab-runner start"
+      command: "/usr/local/bin/gitlab-runner start"
