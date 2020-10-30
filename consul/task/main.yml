@@ -22,8 +22,5 @@
 
     tasks:
             
-            # - name: "Update Ansible inventory file with inventory builder"
-            #shell: declare -a IPS=({{clusterips}});python3 /workspace/roles/consul/helper/inventory_builder.py ${IPS[@]}
-
     - name: "Deploy Consul with Ansible Playbook"
       command: ansible-playbook -i /workspace/roles/consul/task/host.ini  --become --become-user=root /workspace/roles/consul/task/consul.yml --extra-var "consulversion={{consulversion}} consul_datacenter_name={{consul_datacenter_name}} consul_domain_name={{consul_domain_name}}"

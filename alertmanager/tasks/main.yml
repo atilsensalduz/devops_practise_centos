@@ -14,8 +14,6 @@
 
     tasks:
             
-            # - name: "Update Ansible inventory file with inventory builder"
-            #shell: declare -a IPS=({{clusterips}});python3 /workspace/roles/prometheus-federation/helper/inventory_builder.py ${IPS[@]}
 
     - name: "Run Alert ManagerPlaybook"
       command: ansible-playbook -i /workspace/roles/alertmanager/tasks/host.ini  --become --become-user=root /workspace/roles/alertmanager/tasks/alertmanager.yml --extra-var "alertmanagerversion={{alertmanagerversion}}"

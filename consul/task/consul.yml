@@ -1,6 +1,6 @@
 ---
   - name: "Install Consul Cluster with Ansible"
-    hosts: all
+    hosts: consul_servers
 
     tasks:
     - name: "update consul server hostnames"

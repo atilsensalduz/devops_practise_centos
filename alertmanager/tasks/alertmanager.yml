@@ -1,6 +1,6 @@
 ---
   - name: "Install alertmanager with Ansible"
-    hosts: all
+    hosts: alertmanager_server
 
     tasks:
     - name: "Install requiered packages"

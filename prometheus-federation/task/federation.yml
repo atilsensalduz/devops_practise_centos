@@ -1,6 +1,6 @@
 ---
   - name: "Install Prometheus Federation with Ansible"
-    hosts: all
+    hosts: federation_server
 
     tasks:
     - name: "update prometheus federation server hostnames"

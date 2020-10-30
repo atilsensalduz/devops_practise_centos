@@ -1,6 +1,6 @@
 ---
   - name: "Install ElasticSearch with Ansible"
-    hosts: all
+    hosts: elasticsearch_server
 
     tasks:
     - name: "update elastic server hostnames"

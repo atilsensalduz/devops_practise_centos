@@ -18,9 +18,6 @@
 
 
     tasks:
-            
-            # - name: "Update Ansible inventory file with inventory builder"
-            #shell: declare -a IPS=({{clusterips}});python3 /workspace/roles/prometheus-federation/helper/inventory_builder.py ${IPS[@]}
 
     - name: "Deploy Federation with Ansible Playbook"
       command: ansible-playbook -i /workspace/roles/prometheus-federation/task/host.ini  --become --become-user=root /workspace/roles/prometheus-federation/task/federation.yml --extra-var "prometheusversion={{prometheusversion}} prometheusserverurl={{prometheusserverurl}}"
