@@ -2,6 +2,12 @@
   - name: "Install Prometheus Server with Ansible"
     hosts: localhost
     connection: local
+    vars_prompt:
+
+    - name: prometheus_ingress_url
+      prompt: "What is your prometheus external url?"
+      private: no
+
     tasks:
 
     - name: "Create the Monitoring Namespace"

@@ -8,7 +8,7 @@ metadata:
 
 spec:
   rules:
-  - host: prometheus.trendyoltechcase.com
+  - host: {{prometheus_ingress_url}}
     http:
       paths:
       - backend:
